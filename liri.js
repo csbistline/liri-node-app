@@ -6,7 +6,6 @@ require("dotenv").config();
 var axios = require("axios");
 var keys = require("./keys.js");
 var moment = require("moment");
-moment().format();
 var Spotify = require("node-spotify-api");
 var spotify = new Spotify(keys.spotify);
 var fs = require("fs");
@@ -20,8 +19,12 @@ var args = process.argv;
 var action = args[2];
 var target = args[3];
 
+// ==================================
+// FUNCTIONS 
+// ==================================
 
-function doWhat(action, target) {
+// MAIN PICKER FUNCTION
+function picker(action, target) {
     switch (action) {
         case "concert-this":
             concertthis(target);
@@ -45,10 +48,7 @@ function doWhat(action, target) {
     }
 };
 
-// ==================================
-// FUNCTIONS 
-// ==================================
-
+// CONCERTS FUNCTION
 function concertthis(artistName) {
     // * Returns the following from Bands in Town Artist Events API
     // * Name of the venue
@@ -63,22 +63,31 @@ function concertthis(artistName) {
         .then(function (response) {
             var artistInfo = response.data
             var concert;
-            console.log("\n=============================");
-            console.log("Upcoming " + artistName + " concerts");
-            console.log("=============================");
+            today = "Logging entry: " + moment().format("LLL");
+            var text = "";
+            console.log("\nSearching Bands In Town for upcoming " + artistName + " concerts\n");
+            text += "\nSearching Bands In Town for upcoming " + artistName + " concerts\n";
 
             for (concert in artistInfo) {
                 var dates = artistInfo[concert].datetime.split("T");
                 var concertDate = moment(dates[0]).format('LL')
                 var venue = artistInfo[concert].venue;
 
-                console.log("\n=====================");
-                console.log(concertDate);
-                console.log(venue.name);
-                console.log(venue.city + " " + venue.region + " " + venue.country);
-                console.log("=====================");
-            }
+                // console.log("\n=====================");
+                // console.log(concertDate);
+                // console.log(venue.name);
+                // console.log(venue.city + " " + venue.region + " " + venue.country);
+                // console.log("=====================");
 
+                text += "=====================";
+                text += "\n" + concertDate;
+                text += "\n" + venue.name;
+                text += "\n" + venue.city + " " + venue.region + " " + venue.country;
+                text += "\n=====================\n";
+            }
+            console.log(text);
+            updateLog(today)
+            updateLog(text);
         })
 
         // error handling
@@ -96,6 +105,7 @@ function concertthis(artistName) {
         });
 };
 
+// SONGS FUNCTION
 function spotifythissong(songName) {
     // * Returns the following from the Spotify API
     // * Artist(s)
@@ -104,10 +114,10 @@ function spotifythissong(songName) {
     // * The album that the song is from
 
     if (!songName) {
-        console.log("No song specified... enjoy some Ace of Base");
+        console.log("\nNo song specified... enjoy some Ace of Base");
         songName = "The Sign"
     }
-    console.log("Searching Spotify for: " + songName + "\n");
+    console.log("\nSearching Spotify for: " + songName + "\n");
 
     spotify
         .search({ type: 'track', query: songName })
@@ -134,15 +144,8 @@ function spotifythissong(songName) {
         });
 };
 
+// MOVIES FUNCTION
 function moviethis(movieName) {
-
-    if (!movieName) {
-        console.log("No movie specified... You're getting a Jared Leto movie instead.");
-        movieName = "Mr. Nobody"
-    }
-    console.log("Searching Spotify for: " + movieName + "\n");
-
-    var queryURL = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
 
     //     * Returns the following from the OMDB API
     //     * Title of the movie.
@@ -153,13 +156,19 @@ function moviethis(movieName) {
     //     * Language of the movie.
     //     * Plot of the movie.
     //     * Actors in the movie.
-    //   ```
+
+    if (!movieName) {
+        console.log("\nNo movie specified... You're getting a Jared Leto movie instead.");
+        movieName = "Mr. Nobody"
+    }
+    console.log("\nSearching Spotify for: " + movieName + "\n");
+
+    var queryURL = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
 
     axios
         .get(queryURL)
         .then(function (response) {
             var movie = response.data
-            // console.log(movie);
 
             console.log("==================");
             console.log("Movie: " + movie.Title);
@@ -188,20 +197,32 @@ function moviethis(movieName) {
         });
 };
 
+// RANDOM FUNCTION
 function dowhatitsays() {
-    console.log("Do What it says in random.txt...\n");
+    console.log("Do what it says in random.txt...\n");
     fs.readFile("random.txt", "utf8", function (error, data) {
 
-        // If the code experiences any errors it will log the error to the console.
+        // error handling
         if (error) {
             return console.log(error);
         }
 
-        // separate out the action and target from the info in random
+        // separate out the action and target from the info in random, run picker
         var args = data.split(", ");
-        doWhat(args[0], args[1])
+        picker(args[0], args[1])
     })
 };
 
-// start the process
-doWhat(action, target);
+function updateLog(text) {
+    fs.appendFile("log.txt", text, function (err) {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            return;
+        }
+    });
+}
+
+// START APPLICATION
+picker(action, target);
