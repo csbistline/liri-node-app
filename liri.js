@@ -19,6 +19,9 @@ var args = process.argv;
 var action = args[2];
 var target = args[3];
 
+var today = "\nLogging entry: " + moment().format("LLL");
+var text = today;
+
 // ==================================
 // FUNCTIONS 
 // ==================================
@@ -55,6 +58,13 @@ function concertthis(artistName) {
     // * Venue location
     // * Date of the Event (use moment to format this as "MM/DD/YYYY")
 
+    if (!artistName) {
+        text += "\nNo artist specified... but Tool is on tour\n";
+        artistName = "Tool";
+    } else {
+        text += "\nSearching Bands In Town for upcoming " + artistName + " concerts\n";
+    }
+
     var queryURL = "https://rest.bandsintown.com/artists/" + artistName + "/events?app_id=codingbootcamp";
     // console.log(queryURL);
     // make axios request to bandsintown api
@@ -63,21 +73,11 @@ function concertthis(artistName) {
         .then(function (response) {
             var artistInfo = response.data
             var concert;
-            today = "Logging entry: " + moment().format("LLL");
-            var text = "";
-            console.log("\nSearching Bands In Town for upcoming " + artistName + " concerts\n");
-            text += "\nSearching Bands In Town for upcoming " + artistName + " concerts\n";
 
             for (concert in artistInfo) {
                 var dates = artistInfo[concert].datetime.split("T");
                 var concertDate = moment(dates[0]).format('LL')
                 var venue = artistInfo[concert].venue;
-
-                // console.log("\n=====================");
-                // console.log(concertDate);
-                // console.log(venue.name);
-                // console.log(venue.city + " " + venue.region + " " + venue.country);
-                // console.log("=====================");
 
                 text += "=====================";
                 text += "\n" + concertDate;
@@ -85,8 +85,8 @@ function concertthis(artistName) {
                 text += "\n" + venue.city + " " + venue.region + " " + venue.country;
                 text += "\n=====================\n";
             }
+            text += "\n";
             console.log(text);
-            updateLog(today)
             updateLog(text);
         })
 
@@ -114,10 +114,11 @@ function spotifythissong(songName) {
     // * The album that the song is from
 
     if (!songName) {
-        console.log("\nNo song specified... enjoy some Ace of Base");
+        text += "\nNo song specified... enjoy some Ace of Base";
         songName = "The Sign"
+    } else {
+        text += "\nSearching Spotify for: " + songName + "\n";
     }
-    console.log("\nSearching Spotify for: " + songName + "\n");
 
     spotify
         .search({ type: 'track', query: songName })
@@ -128,19 +129,21 @@ function spotifythissong(songName) {
             for (i in albums) {
                 // console.log(albums[i]);
                 var info = albums[i];
-                console.log("==================");
-                console.log("Artist: " + info.artists[0].name);
-                console.log("Song: " + info.name);
-                console.log("Album: " + info.album.name);
-                console.log("Preview: " + info.preview_url);
-                console.log("Full album: " + info.external_urls.spotify);
-                console.log("==================\n");
+                text += "==================";
+                text += "\nArtist: " + info.artists[0].name;
+                text += "\nSong: " + info.name;
+                text += "\nAlbum: " + info.album.name;
+                text += "\nPreview: " + info.preview_url;
+                text += "\nFull album: " + info.external_urls.spotify;
+                text += "\n==================\n";
             }
+            text += "\n";
+            console.log(text);
+            updateLog(text);
+
         })
         .catch(function (err) {
-            // console.log(err);
-            console.log("Couldn't find that...");
-
+            console.log(err);
         });
 };
 
@@ -158,10 +161,10 @@ function moviethis(movieName) {
     //     * Actors in the movie.
 
     if (!movieName) {
-        console.log("\nNo movie specified... You're getting a Jared Leto movie instead.");
+        text += "\nNo movie specified... You're getting a Jared Leto movie instead.\n";
         movieName = "Mr. Nobody"
     }
-    console.log("\nSearching Spotify for: " + movieName + "\n");
+    text += "\nSearching Spotify for: " + movieName + "\n";
 
     var queryURL = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
 
@@ -170,16 +173,19 @@ function moviethis(movieName) {
         .then(function (response) {
             var movie = response.data
 
-            console.log("==================");
-            console.log("Movie: " + movie.Title);
-            console.log("Year: " + movie.Year);
-            console.log("Actors: " + movie.Actors);
-            console.log(movie.Ratings[0].Source + " rating: " + movie.Ratings[0].Value);
-            console.log(movie.Ratings[1].Source + " rating: " + movie.Ratings[1].Value);
-            console.log("Country: " + movie.Country);
-            console.log("Language: " + movie.Language);
-            console.log("Plot: " + movie.Plot);
-            console.log("==================\n");
+            text += "==================";
+            text += "\nMovie: " + movie.Title;
+            text += "\nYear: " + movie.Year;
+            text += "\nActors: " + movie.Actors;
+            text += "\n" + movie.Ratings[0].Source + " rating: " + movie.Ratings[0].Value;
+            text += "\n" + movie.Ratings[1].Source + " rating: " + movie.Ratings[1].Value;
+            text += "\nCountry: " + movie.Country;
+            text += "\nLanguage: " + movie.Language;
+            text += "\nPlot: " + movie.Plot;
+            text += "\n==================\n";
+
+            console.log(text);
+            updateLog(text);
         })
 
         // error handling
@@ -222,7 +228,7 @@ function updateLog(text) {
             return;
         }
     });
-}
+};
 
 // START APPLICATION
 picker(action, target);
