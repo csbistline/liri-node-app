@@ -9,6 +9,7 @@ var moment = require("moment");
 var Spotify = require("node-spotify-api");
 var spotify = new Spotify(keys.spotify);
 var fs = require("fs");
+var inquirer = require("inquirer");
 var args = process.argv;
 
 // WHAT ACTION SHOULD BE PERFORMED?
@@ -18,6 +19,9 @@ var args = process.argv;
 // * `do-what-it-says`
 var action = args[2];
 var target = args[3];
+var today = "Logging entry: " + moment().format("LLL");
+var text = "";
+
 
 var today = "\nLogging entry: " + moment().format("LLL");
 var text = today;
@@ -78,7 +82,7 @@ function concertthis(artistName) {
                 var dates = artistInfo[concert].datetime.split("T");
                 var concertDate = moment(dates[0]).format('LL')
                 var venue = artistInfo[concert].venue;
-
+                // build text to print log and console.log
                 text += "=====================";
                 text += "\n" + concertDate;
                 text += "\n" + venue.name;
@@ -140,7 +144,6 @@ function spotifythissong(songName) {
             text += "\n";
             console.log(text);
             updateLog(text);
-
         })
         .catch(function (err) {
             console.log(err);
@@ -230,5 +233,52 @@ function updateLog(text) {
     });
 };
 
+function inquire() {
+    inquirer.prompt([
+        {
+            name: "action",
+            message: "What would you like to search for?",
+            type: "list",
+            choices: ["Concerts", "Songs", "Movies", "Surprise me"]
+        }
+    ]).then(function (firstAnswer) {
+        var action = firstAnswer.action;
+        if (action === "Surprise me") {
+            picker("do-what-it-says")
+        } else {
+            inquirer.prompt([
+                {
+                    name: "target",
+                    message: "Enter a band, song or movie name."
+                }
+            ]).then(function (secondAnswer) {
+                var target = secondAnswer.target;
+                switch (action) {
+                    case "Concerts":
+                        picker("concert-this", target);
+                        break;
+                    case "Songs":
+                        picker("spotify-this-song", target);
+                        break;
+                    case "Movies":
+                        picker("movie-this", target);
+                        break;
+                    default:
+                        break;
+                };
+            });
+        };
+
+    });
+};
+
 // START APPLICATION
-picker(action, target);
+// Can be run with arguments from command line, or through prompted input from inquirer
+function initLiri() {
+    if (action) {
+        picker(action, target);
+    } else {
+        inquire();
+    };
+} 
+initLiri();

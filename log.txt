@@ -396,13 +396,3 @@ Orlando FL United States
 
 Logging entry: March 27, 2019 5:57 PM
 Searching Spotify for: Jaws
-==================
-Movie: Jaws
-Year: 1975
-Actors: Roy Scheider, Robert Shaw, Richard Dreyfuss, Lorraine Gary
-Internet Movie Database rating: 8.0/10
-Rotten Tomatoes rating: 97%
-Country: USA
-Language: English
-Plot: When a killer shark unleashes chaos on a beach resort, it's up to a local sheriff, a marine biologist, and an old seafarer to hunt the beast down.
-==================
