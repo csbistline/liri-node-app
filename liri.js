@@ -10,19 +10,10 @@ var Spotify = require("node-spotify-api");
 var spotify = new Spotify(keys.spotify);
 var fs = require("fs");
 var inquirer = require("inquirer");
-var args = process.argv;
 
-// WHAT ACTION SHOULD BE PERFORMED?
-// * `concert-this`
-// * `spotify-this-song`
-// * `movie-this`
-// * `do-what-it-says`
+var args = process.argv;
 var action = args[2];
 var target = args[3];
-var today = "Logging entry: " + moment().format("LLL");
-var text = "";
-
-
 var today = "\nLogging entry: " + moment().format("LLL");
 var text = today;
 
@@ -63,11 +54,10 @@ function concertthis(artistName) {
     // * Date of the Event (use moment to format this as "MM/DD/YYYY")
 
     if (!artistName) {
-        text += "\nNo artist specified... but Tool is on tour\n";
+        text += "\nNo artist specified... but Tool is on tour";
         artistName = "Tool";
-    } else {
-        text += "\nSearching Bands In Town for upcoming " + artistName + " concerts\n";
     }
+    text += "\nSearching Bands In Town for upcoming " + artistName + " concerts\n";
 
     var queryURL = "https://rest.bandsintown.com/artists/" + artistName + "/events?app_id=codingbootcamp";
     // console.log(queryURL);
@@ -120,9 +110,9 @@ function spotifythissong(songName) {
     if (!songName) {
         text += "\nNo song specified... enjoy some Ace of Base";
         songName = "The Sign"
-    } else {
-        text += "\nSearching Spotify for: " + songName + "\n";
     }
+
+    text += "\nSearching Spotify for: " + songName + "\n";
 
     spotify
         .search({ type: 'track', query: songName })
@@ -164,10 +154,10 @@ function moviethis(movieName) {
     //     * Actors in the movie.
 
     if (!movieName) {
-        text += "\nNo movie specified... You're getting a Jared Leto movie instead.\n";
+        text += "\nNo movie specified... You're getting a Jared Leto movie instead.";
         movieName = "Mr. Nobody"
     }
-    text += "\nSearching Spotify for: " + movieName + "\n";
+    text += "\nSearching OMDB for: " + movieName + "\n";
 
     var queryURL = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
 
@@ -280,5 +270,5 @@ function initLiri() {
     } else {
         inquire();
     };
-} 
+}
 initLiri();
